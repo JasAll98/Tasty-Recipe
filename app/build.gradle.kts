@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.jasallprojects.tastyrecipe"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.jasallprojects.tastyrecipe"
