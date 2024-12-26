@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.jsoup.nodes.Entities.EscapeMode.extended
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -40,6 +42,15 @@ android {
 }
 
 dependencies {
+
+    // Implementing lifecycle viewmodel
+    implementation(libs.androidx.lifecycle.viewmodel)
+
+    // Implementing Coil
+    implementation(libs.io.coil.kt)
+    implementation(libs.io.coil.kt.network)
+
+    implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

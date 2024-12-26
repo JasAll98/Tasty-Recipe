@@ -19,6 +19,11 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 24.sp
     ),
+    displayMedium = TextStyle(
+        fontFamily = Merienda,
+        fontWeight = FontWeight.Normal,
+        fontSize = 20.sp
+    ),
     bodyLarge = TextStyle(
         fontFamily = Merienda,
         fontWeight = FontWeight.Normal,

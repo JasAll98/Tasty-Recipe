@@ -2,4 +2,7 @@
     <string name="app_name">Tasty Recipe</string>
     
     <string name="recipe_photo">Recipe photo</string>
+    <string name="time_icon_desc">Time icon</string>
+    <string name="no_connection">No connection</string>
+    <string name="retry">Yangilash\n</string>
 </resources>
