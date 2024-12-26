@@ -1,9 +1,10 @@
-import org.gradle.internal.impldep.org.jsoup.nodes.Entities.EscapeMode.extended
+import org.gradle.kotlin.dsl.android
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.serialization.plugin)
 }
 
 android {
@@ -50,7 +51,16 @@ dependencies {
     implementation(libs.io.coil.kt)
     implementation(libs.io.coil.kt.network)
 
+    // Implementing Icons
     implementation(libs.androidx.material.icons.extended)
+
+    // Implementing Retrofit with OkHttp
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.okhttp)
+
+    //Implementing Kotlin Serialization with Converter
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.converter)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
