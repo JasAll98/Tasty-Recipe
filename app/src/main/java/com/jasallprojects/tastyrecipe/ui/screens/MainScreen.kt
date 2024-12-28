@@ -40,17 +40,22 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.jasallprojects.tastyrecipe.R
 import com.jasallprojects.tastyrecipe.model.Recipe
-import com.jasallprojects.tastyrecipe.model.RecipeLocalData.recipes
 
 
 @Composable
 fun MainScreen(
-    tastyRecipeUiState: List<Recipe>,
+    retryAction: () -> Unit,
+    tastyRecipeUiState: TastyRecipeUiState,
     modifier: Modifier = Modifier,
 ) {
-    Column {
-        CategoryList(tastyRecipeUiState)
-        RecipeList(recipes, modifier.fillMaxSize())
+    when (tastyRecipeUiState) {
+        is TastyRecipeUiState.Success -> RecipeList(
+            tastyRecipeUiState.recipe.recipes,
+            modifier.fillMaxSize()
+        )
+
+        is TastyRecipeUiState.Loading -> LoadingScreen(modifier.fillMaxSize())
+        is TastyRecipeUiState.Error -> ErrorScreen(retryAction, modifier.fillMaxSize())
     }
 }
 
@@ -95,9 +100,12 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 
 @Composable
 fun RecipeList(recipes: List<Recipe>, modifier: Modifier = Modifier) {
-    LazyColumn(modifier = modifier) {
-        items(recipes) { item ->
-            RecipeCard(item)
+    Column {
+        CategoryList(recipes)
+        LazyColumn(modifier = modifier) {
+            items(recipes) { item ->
+                RecipeCard(item)
+            }
         }
     }
 }

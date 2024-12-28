@@ -4,18 +4,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.jasallprojects.tastyrecipe.model.Recipe
-import com.jasallprojects.tastyrecipe.model.RecipeLocalData.recipes
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.jasallprojects.tastyrecipe.TastyRecipeApplication
+import com.jasallprojects.tastyrecipe.data.RecipesRepository
+import com.jasallprojects.tastyrecipe.model.Recipes
+import kotlinx.coroutines.launch
+import okio.IOException
+import retrofit2.HttpException
 
 sealed interface TastyRecipeUiState {
-    data class Success(val recipe: String) : TastyRecipeUiState
+    data class Success(val recipe: Recipes) : TastyRecipeUiState
     object Loading : TastyRecipeUiState
     object Error : TastyRecipeUiState
 }
 
-class TastyRecipeViewModel : ViewModel() {
+class TastyRecipeViewModel(private val recipesRepository: RecipesRepository) : ViewModel() {
 
-    var tastyRecipeUiState: List<Recipe> by mutableStateOf(recipes)
+    var tastyRecipeUiState: TastyRecipeUiState by mutableStateOf(TastyRecipeUiState.Loading)
         private set
 
     init {
@@ -23,6 +32,25 @@ class TastyRecipeViewModel : ViewModel() {
     }
 
     fun getRecipes() {
-        tastyRecipeUiState = recipes
+        viewModelScope.launch {
+            TastyRecipeUiState.Loading
+            tastyRecipeUiState = try {
+                TastyRecipeUiState.Success(recipesRepository.getRecipes())
+            } catch (e: IOException) {
+                TastyRecipeUiState.Error
+            } catch (e: HttpException) {
+                TastyRecipeUiState.Error
+            }
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as TastyRecipeApplication)
+                val repository = application.container.recipesRepository
+                TastyRecipeViewModel(recipesRepository = repository)
+            }
+        }
     }
 }
