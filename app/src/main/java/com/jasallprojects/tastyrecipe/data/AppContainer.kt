@@ -10,7 +10,7 @@ interface AppContainer {
     val recipesRepository: RecipesRepository
 }
 
-class DefaultAppContainer: AppContainer {
+class DefaultAppContainer : AppContainer {
 
     private val baseUrl = "https://dummyjson.com"
 

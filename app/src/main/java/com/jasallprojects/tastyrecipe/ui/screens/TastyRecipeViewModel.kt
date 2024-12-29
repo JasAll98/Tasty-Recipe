@@ -11,13 +11,13 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.jasallprojects.tastyrecipe.TastyRecipeApplication
 import com.jasallprojects.tastyrecipe.data.RecipesRepository
-import com.jasallprojects.tastyrecipe.model.Recipes
+import com.jasallprojects.tastyrecipe.model.Recipe
 import kotlinx.coroutines.launch
 import okio.IOException
 import retrofit2.HttpException
 
 sealed interface TastyRecipeUiState {
-    data class Success(val recipe: Recipes) : TastyRecipeUiState
+    data class Success(val recipe: List<Recipe>, val tags: List<String>) : TastyRecipeUiState
     object Loading : TastyRecipeUiState
     object Error : TastyRecipeUiState
 }
@@ -27,6 +27,22 @@ class TastyRecipeViewModel(private val recipesRepository: RecipesRepository) : V
     var tastyRecipeUiState: TastyRecipeUiState by mutableStateOf(TastyRecipeUiState.Loading)
         private set
 
+    fun updateRecipe(tag: String) {
+        viewModelScope.launch {
+            TastyRecipeUiState.Loading
+            tastyRecipeUiState = try {
+                TastyRecipeUiState.Success(
+                    recipe = recipesRepository.getRecipesByTag(tag).recipes,
+                    tags = recipesRepository.getTags()
+                )
+            } catch (e: IOException) {
+                TastyRecipeUiState.Error
+            } catch (e: HttpException) {
+                TastyRecipeUiState.Error
+            }
+        }
+    }
+
     init {
         getRecipes()
     }
@@ -35,7 +51,10 @@ class TastyRecipeViewModel(private val recipesRepository: RecipesRepository) : V
         viewModelScope.launch {
             TastyRecipeUiState.Loading
             tastyRecipeUiState = try {
-                TastyRecipeUiState.Success(recipesRepository.getRecipes())
+                TastyRecipeUiState.Success(
+                    recipe = recipesRepository.getRecipes().recipes,
+                    recipesRepository.getTags()
+                )
             } catch (e: IOException) {
                 TastyRecipeUiState.Error
             } catch (e: HttpException) {

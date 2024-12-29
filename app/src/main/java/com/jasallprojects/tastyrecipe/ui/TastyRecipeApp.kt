@@ -39,8 +39,15 @@ fun TastyRecipeApp(modifier: Modifier = Modifier) {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            val tastyRecipeViewModel: TastyRecipeViewModel = viewModel(factory = TastyRecipeViewModel.Factory)
-            MainScreen(retryAction = tastyRecipeViewModel::getRecipes,tastyRecipeUiState = tastyRecipeViewModel.tastyRecipeUiState)
+            val tastyRecipeViewModel: TastyRecipeViewModel =
+                viewModel(factory = TastyRecipeViewModel.Factory)
+            MainScreen(
+                updateTag = { text ->
+                    tastyRecipeViewModel.updateRecipe(text)
+                },
+                retryAction = tastyRecipeViewModel::getRecipes,
+                tastyRecipeUiState = tastyRecipeViewModel.tastyRecipeUiState
+            )
         }
     }
 }

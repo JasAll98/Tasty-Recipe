@@ -1,6 +1,7 @@
 package com.jasallprojects.tastyrecipe.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.Button
@@ -44,13 +46,17 @@ import com.jasallprojects.tastyrecipe.model.Recipe
 
 @Composable
 fun MainScreen(
+    updateTag: (String) -> Unit,
     retryAction: () -> Unit,
     tastyRecipeUiState: TastyRecipeUiState,
     modifier: Modifier = Modifier,
 ) {
     when (tastyRecipeUiState) {
         is TastyRecipeUiState.Success -> RecipeList(
-            tastyRecipeUiState.recipe.recipes,
+            updateTag = updateTag,
+            retryAction = retryAction,
+            tastyRecipeUiState.recipe,
+            tastyRecipeUiState.tags,
             modifier.fillMaxSize()
         )
 
@@ -59,49 +65,17 @@ fun MainScreen(
     }
 }
 
-@Composable
-fun LoadingScreen(modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            color = ProgressIndicatorDefaults.linearColor,
-            strokeWidth = 18.dp,
-            strokeCap = StrokeCap.Round,
-            modifier = Modifier.width(100.dp)
-        )
-    }
-}
 
 @Composable
-fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(R.drawable.no_connection),
-                contentDescription = stringResource(R.string.no_connection),
-                modifier = Modifier.size(150.dp)
-            )
-            Spacer(Modifier.height(24.dp))
-            Button(
-                onClick = retryAction,
-                modifier = Modifier.height(50.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.retry),
-                    style = MaterialTheme.typography.displayMedium,
-                    modifier = Modifier.padding(horizontal = 40.dp, vertical = 4.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun RecipeList(recipes: List<Recipe>, modifier: Modifier = Modifier) {
+fun RecipeList(
+    updateTag: (String) -> Unit,
+    retryAction: () -> Unit,
+    recipes: List<Recipe>,
+    tags: List<String>,
+    modifier: Modifier = Modifier,
+) {
     Column {
-        CategoryList(recipes)
+        CategoryList(updateTag = updateTag, retryAction, tags)
         LazyColumn(modifier = modifier) {
             items(recipes) { item ->
                 RecipeCard(item)
@@ -173,16 +147,31 @@ fun RecipeCard(recipe: Recipe, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CategoryList(listRecipes: List<Recipe>) {
-    var tags: MutableList<String> = mutableListOf()
-    for (item in listRecipes) {
-        for (tag in item.tags) {
-            tags.add(tag)
-        }
-    }
+fun CategoryList(updateTag: (String) -> Unit, retryAction: () -> Unit, listTags: List<String>) {
     LazyRow(modifier = Modifier.padding(start = 16.dp)) {
-        items(tags.distinct()) { item ->
-            Card(modifier = Modifier.padding(4.dp)) {
+        item {
+            Card(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .clickable(
+                        onClick = retryAction
+                    )
+            ) {
+                Text(
+                    text = "All",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
+        }
+        itemsIndexed(listTags.distinct()) { index, item ->
+            Card(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .clickable(
+                        onClick = { updateTag(item) }
+                    ),
+            ) {
                 Text(
                     text = item,
                     style = MaterialTheme.typography.labelMedium,
@@ -193,3 +182,41 @@ fun CategoryList(listRecipes: List<Recipe>) {
     }
 }
 
+@Composable
+fun LoadingScreen(modifier: Modifier = Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            color = ProgressIndicatorDefaults.linearColor,
+            strokeWidth = 18.dp,
+            strokeCap = StrokeCap.Round,
+            modifier = Modifier.width(100.dp)
+        )
+    }
+}
+
+@Composable
+fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(R.drawable.no_connection),
+                contentDescription = stringResource(R.string.no_connection),
+                modifier = Modifier.size(150.dp)
+            )
+            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = retryAction,
+                modifier = Modifier.height(50.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.retry),
+                    style = MaterialTheme.typography.displayMedium,
+                    modifier = Modifier.padding(horizontal = 40.dp, vertical = 4.dp)
+                )
+            }
+        }
+    }
+}
